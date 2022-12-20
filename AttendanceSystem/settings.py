@@ -109,8 +109,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.iran.liara.ir'
+EMAIL_PORT=587
+EMAIL_HOST_USER = 'attsys'
+EMAIL_HOST_PASSWORD = '71102925-7506-4ec4-8394-0cc1a1758e8c'
+EMAIL_USE_TLS = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
