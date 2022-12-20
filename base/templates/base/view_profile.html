@@ -1,0 +1,125 @@
+<!-- {% block content %} -->
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include "header.html" %}
+    <style>
+      .grid-container {
+        display: grid;
+        padding: 10%;
+        grid-template-columns: auto auto;
+      }
+
+      .grid-item {
+        text-align: left;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div>{% include "navbar.html" %}</div>
+
+    <!-- Section: Design Block -->
+    <section class="text-center">
+      <!-- Background image -->
+      <div
+        class="p-5 bg-image"
+        style="
+          background-image: url('https://mdbootstrap.com/img/new/textures/full/171.jpg');
+          height: 300px;
+        "
+      ></div>
+
+      <div
+        class="card"
+        style="
+          width: 56%;
+          margin-left: 22%;
+          margin-top: -200px;
+          background: hsla(0, 0%, 100%, 0.8);
+          backdrop-filter: blur(30px);
+        "
+      >
+        <div class="grid-container">
+          <div class="grid-item" style="text-align: center">
+            <div>
+
+              {% if request.user.employee.profile_picture %} 
+              <img
+              src="{{request.user.employee.profile_picture.url}}"
+              class="rounded-circle float-left mr-2"
+              alt="profile"
+              width="150"
+              height="150"
+            /> 
+              {% else %} 
+              <img
+              src="{% static 'images/default_prof.png' %}"
+              class="rounded-circle float-left mr-2"
+              alt="profile"
+              width="150"
+              height="150"
+            /> 
+            {% endif %}
+
+            </div>
+            <!-- <div>
+              <a
+                onMouseOver="this.style.color='#5d74ba'"
+                onMouseOut="this.style.color='black'"
+                >Change profile photo</a
+              >
+            </div> -->
+          </div>
+          <div class="grid-item">
+            <div>
+              <!-- <h2>User Profile</h2> -->
+              <label><b>Username: </b></label>
+              {{user.username}}
+              <br />
+              <label><b>First name: </b></label>
+              {{user.employee.first_name}}
+              <br />
+              <label><b>Last name: </b></label>
+              {{user.employee.last_name}}
+              <br />
+
+              <label><b>Email address: </b></label>
+              {{user.employee.email}}
+              <br />
+              <label><b>Mobile number: </b></label>
+              {{user.employee.mobile_number | default_if_none:"" }}
+              <br />
+              <label><b>Department: </b></label>
+              {{user.employee.department}}
+              <br />
+              <label><b>Position: </b></label>
+              {{user.employee.position}}
+            </div>
+            <!-- <b>Face registration status :</b>
+            if registered
+            <span class="badge bg-success">Registered!</span>
+            if not registered
+            <span class="badge bg-danger" style="margin-bottom: 10px"
+              >Not registered!</span
+            >
+            <div style="padding: 1px; width: 100%" class="alert alert-danger">
+              Please upload your pictures, or your attendance won't be
+              processed.
+            </div>
+            else if -->
+            <br />
+            <a href="{% url 'edit-profile' %}">
+              <button type="button" class="dark-blue-button" role="button">
+                Edit Profile
+              </button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+  <!-- {% endblock %} -->
+</html>

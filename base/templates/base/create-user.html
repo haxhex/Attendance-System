@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include "header.html" %}
+    <script>
+      window.onload = function () {
+        var position = localStorage.getItem("position");
+        console.log(position);
+        if (position !== null && position != 'undefined') $("#position").val(position);
+      }
+    </script>
+  </head>
+  <body>
+    <div>{%include "navbar.html" %}</div>
+    <!-- Section: Design Block -->
+      <!-- Background image -->
+      <div
+        class="p-5 bg-image"
+        style="
+          background-image: url('https://mdbootstrap.com/img/new/textures/full/171.jpg');
+          height: 300px;
+        "
+      ></div>
+      <!-- Background image -->
+
+      <div
+        class="card"
+        style="
+          width: 40%;
+          margin-left: 30%;
+          margin-top: -250px;
+          background: hsla(0, 0%, 100%, 0.8);
+          backdrop-filter: blur(30px);
+        "
+      >
+        <div class="card-body py-5 px-md-5">
+          <div class="row d-flex justify-content-center">
+            <div class="col-lg-8">
+              <section class="text-center">
+                <h2 class="fw-bold mb-5">Create a User</h2>
+              </section>
+              <form method="POST" action="">
+                {% csrf_token %}
+                <!-- 2 column grid layout with text inputs for the first and last names -->
+                <!-- Email input -->
+                <div class="form-outline mb-4">
+                  <label class="form-label" for="form3Example0">Username</label>
+                  {{form.username}}
+                  <!-- <input type="text" name="username" id="form3Example0" class="form-control" /> -->
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <div class="form-outline">
+                      <label class="form-label" for="form3Example1"
+                        >First name</label
+                      >
+                      {{form.first_name}}
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <div class="form-outline">
+                      <label class="form-label" for="form3Example2"
+                        >Last name</label
+                      >
+                      {{form.last_name}}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Username input -->
+                <!-- <div class="form-outline mb-4">
+                  <label class="form-label" for="form3Example3">Username</label>
+                  <input type="email" id="form3Example3" class="form-control" />
+                </div> -->
+
+                <!-- Email input -->
+                <div class="form-outline mb-4">
+                  <label class="form-label" for="form3Example3"
+                    >Email address</label
+                  >
+                  <!-- <input type="email" name="email" id="form3Example3" class="form-control" /> -->
+                  {{form.email}}
+                </div>
+
+
+                <div class="form-outline mb-4">
+                  <label class="form-label" for="form3Example6">Position</label>
+                  <!-- <input type="email" name="email" id="form3Example3" class="form-control" /> -->
+                  <select
+                    id="position"
+                    name="position"
+                    required
+                    style="width: 80%; color:rgb(93, 87, 87);"
+                    required
+                  >
+                    <option value="" selected disabled>
+                      Select your position
+                    </option>
+                    <optgroup label="Accouning">
+                      <option value="Auditor">Auditor</option>
+                      <option value="CFO">CFO</option>
+                      <option value="Payroll specialist">
+                        Payroll specialist
+                      </option>
+                      <option value="Tax specialist">Tax specialist</option>
+                    </optgroup>
+                    <optgroup label="Marketing">
+                      <option value="Advertising manager">
+                        Advertising manager
+                      </option>
+                      <option value="Brand manager">Brand manager</option>
+                      <option value="Public relations officer">
+                        Public relations officer
+                      </option>
+                      <option value="Market analyst">Market analyst</option>
+                    </optgroup>
+                    <optgroup label="Human resources">
+                      <option value="Compensation specialist">
+                        Compensation specialist
+                      </option>
+                      <option value="Brand manager">Brand manager</option>
+                      <option value="Personnel manager">
+                        Personnel manager
+                      </option>
+                      <option value="Market analyst">Market analyst</option>
+                      <option value="Recruiter">Recruiter</option>
+                      <option value="Training manager">Training manager</option>
+                    </optgroup>
+                    <optgroup label="Production">
+                      <option value="Chief inspector">Chief inspector</option>
+                      <option value="Brand manager">Brand manager</option>
+                      <option value="Market analyst">Market analyst</option>
+                      <option value="Recruiter">Recruiter</option>
+                      <option value="Machinist">Machinist</option>
+                      <option value="Plant manager">Plant manager</option>
+                      <option value="Quality control manager ">
+                        Quality control manager
+                      </option>
+                    </optgroup>
+                    <optgroup label="IT">
+                      <option value="Communications analyst">
+                        Communications analyst
+                      </option>
+                      <option value="Database administrator">
+                        Database administrator
+                      </option>
+                      <option value="E_business specialist">
+                        E-business specialist
+                      </option>
+                      <option value="PC support specialist">
+                        PC support specialist
+                      </option>
+                      <option value="Programmer">Programmer</option>
+                      <option value="Site manager">Site manager</option>
+                    </optgroup>
+                    <optgroup label="Sales">
+                      <option value="Branch manager">Branch manager</option>
+                      <option value="Retail manager">Retail manager</option>
+                      <option value="Telemarketer">Telemarketer</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+
+                <!-- Password input -->
+                <div class="form-outline mb-4">
+                  <label class="form-label" for="form3Example4"
+                    >Enter the password</label
+                  >
+                  <!-- <input
+                    name="password1"
+                    type="password"
+                    id="form3Example4"
+                    class="form-control"
+                  /> -->
+                  {{form.password1}}
+                </div>
+
+                <!-- Password input -->
+                <div class="form-outline mb-4">
+                  <label class="form-label" for="form3Example5"
+                    >Re-Enter the password</label
+                  >
+                  <!-- <input
+                    name="password2"
+                    type="password"
+                    id="form3Example4"
+                    class="form-control"
+                  /> -->
+                  {{form.password2}}
+                </div>
+
+                <!-- Submit button -->
+                <section class="text-center">
+                  <button type="submit" style="background-color: #334180;">
+                    Create
+                  </button>
+                </section>
+                <!-- switch to login-->
+                </div>
+                <div style="width: 100%; text-align: center;">
+                  <div style="color: red; text-align:left; display: inline-block; margin: 0 auto; padding: 3px;">
+                    <ul>
+                      {% for error in errors  %}
+                      <li>{{error}}</li>
+                    {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Section: Design Block -->
+    <script>
+      window.onbeforeunload = function () {
+        localStorage.setItem("position", $("#position").val());
+      }
+    </script>
+  </body>
+</html>

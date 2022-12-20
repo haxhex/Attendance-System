@@ -1,0 +1,282 @@
+{% block content %} {% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include "header.html" %}
+    <link rel="stylesheet" href="{% static 'css/calender.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+    <style>
+      .flex-container {
+        display: flex;
+        padding: 5px;
+      }
+
+
+      .calendar {
+        margin-left: auto;
+        margin-right: auto;
+        /* margin-left: 1%;
+        margin-right: 1%; */
+      }
+
+      ul {
+        height: 100%;
+        padding: 0px 5px 0px 20px;
+      }
+
+      a {
+        color: #334180;
+      }
+
+      .left {
+        float: left;
+      }
+
+      .right {
+        float: right;
+        margin-left: 5px;
+      }
+
+      .btn {
+        flex-direction: column;
+        align-items: center;
+        padding: 6px 14px;
+        font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+        border-radius: 6px;
+        border: none;
+
+        /* background: #838284; */
+        background-color: #334180;
+        box-shadow: 0px 0.5px 1px rgba(0, 0, 0, 0.1),
+          inset 0px 0.5px 0.5px rgba(255, 255, 255, 0.5),
+          0px 0px 0px 0.5px rgba(0, 0, 0, 0.12);
+        color: #dfdedf;
+        user-select: none;
+        -webkit-user-select: none;
+        /* touch-action: manipulation; */
+      }
+
+      .btn:hover{
+        /* background: #838284; */
+        background-color: #334180;
+        color: #dfdedf;
+      }
+
+      .clearfix {
+        margin: 15px;
+      }
+
+      .form {
+        margin: auto;
+      }
+
+      .form input,
+      .form select,
+      .form textarea {
+        border-radius: 5px;
+        border: 1px solid;
+        outline: none;
+        background: none;
+        padding: 5px;
+        width: 100%;
+      }
+      table.center {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .flex-container2 {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* .grid-container {
+        display: grid;
+        grid-template-columns: auto auto;
+      } */
+
+      .grid-item {
+        text-align: left;
+      }
+
+      .grid-container {
+        display: grid;
+        grid-template-columns: auto auto;
+      }
+    </style>
+
+    <script
+      data-require="jquery"
+      data-semver="3.1.1"
+      src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"
+    ></script>
+    <script src="https://npmcdn.com/moment@2.14.1"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+    <script>
+      $(function(){
+          const ctx = document.getElementById('myChart').getContext('2d');
+
+          let dates = {{datess|safe}};
+          let times = {{timess|safe}};
+
+          let data = dates.map((year, index) => ({
+            x: moment(`${year}-01-01`),
+            y: moment(`1970-02-01 ${times[index]}`).valueOf()
+          }));
+
+          let bckColors = ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850", "#565452", "#321456", "#129864", "#326812", "#215984"];
+
+          let myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: "Time",
+                        backgroundColor: 'rgba(188, 229, 214, 0.7)',
+                        pointBackgroundColor: bckColors,
+                        data: data,
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }
+                ]
+            },
+            options: {
+              tooltips: {
+                callbacks: {
+                  label: function(tooltipItem, data) {
+                    console.log(tooltipItem.yLabel)
+                    return data.datasets[tooltipItem.datasetIndex].label + ': ' + epoch_to_hh_mm_ss(tooltipItem.yLabel)
+                  },
+                  title: function(tooltipItem, data) {
+                    //return formatted date
+                    return tooltipItem.xLabel;
+                  },
+                  beforeLabel: function(tooltipItem, data) {
+                    //return formatted date
+                    return "Date: " + epoch_date(tooltipItem.xLabel)
+                  },
+                }
+              },
+                scales: {
+                    xAxes: [
+                      {
+                        type: 'time',
+                        position: 'bottom',
+                        time: {
+                          displayFormats: {
+                            years: 'YYYY'
+                          },
+                          unit: 'day'
+                        }
+                      }
+                    ],
+                    yAxes: [
+                      {
+                        type: 'linear',
+                        position: 'left',
+                        ticks: {
+                          min: moment('1970-02-01 00:00:00').valueOf(),
+                          max: moment('1970-02-01 23:59:59').valueOf(),
+                          stepSize: 3.6e+6,
+                          beginAtZero: false,
+                          callback: value => {
+                            let date = moment(value);
+                            if(date.diff(moment('1970-02-01 23:59:59'), 'second') === 0) {
+                              return null;
+                            }
+
+                            return date.format('HH:mm:ss');
+                          },
+                        }
+                      }
+                    ]
+                },
+            }
+          });
+          function epoch_to_hh_mm_ss(epoch) {
+            console.log(epoch)
+            //console.log(new Date(epoch*1000).toISOString())
+            var tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            var localISOTime = (new Date(epoch - tzoffset)).toISOString().slice(0, -1);
+
+            return localISOTime.substring(11,19)
+          }
+
+          function epoch_date(epoch) {
+            console.log(epoch)
+            //console.log(new Date(epoch*1000).toISOString())
+            var tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            var localISOTime = (new Date(epoch - tzoffset)).toISOString().slice(0, -1);
+
+            return localISOTime.substring(0,10)
+          }
+        });
+    </script>
+  </head>
+
+  <body>
+    {%include "navbar.html" %}
+    <!-- background image -->
+    <div
+      class="p-5 bg-image"
+      style="
+        background-image: url('https://mdbootstrap.com/img/new/textures/full/171.jpg');
+        height: 300px;
+      "
+    ></div>
+
+    <!-- main card -->
+    <div
+      class="card"
+      style="
+        width: 90%;
+        margin-left: 5%;
+        margin-top: -250px;
+        background: hsla(0, 0%, 100%, 0.8);
+        backdrop-filter: blur(30px);
+      "
+    >
+    <div class="flex-container2"> 
+      <!-- <form action="/action_page.php" style="margin-bottom: 10px">
+        <label for="select date">Select date:</label>
+        <input type="date" id="birthday" name="birthday" />
+        <input type="submit" />
+      </form> -->
+
+
+      <div class="clearfix">
+        <a class="btn right" href="{% url 'calendar' %}?{{ next_month }}"> Next Month </a>
+        <a class="btn right" href="{% url 'calendar' %}?{{ prev_month }}"> Previous Month </a>
+      </div>
+
+      <div class="flex-container">
+        <div style="width:30%; margin:10px; margin-left: 30px;">
+          <canvas id="myChart" width="700" height="1200" style="border:3px solid #b4b0b7; padding: 10px;"></canvas>
+        </div>
+        <div style="width:70%;">
+          {{ calendar }}
+        </div>
+      </div>
+
+
+  </div> 
+  </body>
+</html>
+{% endblock %}
+
+<!-- because of wifth of image they aren't in a row! -->
+<!-- if you switch calnder & graph they'll be in same row.because calender is flexible -->
+<!-- <div> -->
+<!-- <table class="right"> -->
+<!-- <tr> -->
+<!-- <td> -->
+<!-- {% if chart %} -->
+<!-- <img src="data:image/png;base64, {{chart|safe}}" /> -->
+
+<!-- {% endif %} -->
+<!-- </td> -->
+<!-- </tr> -->
+<!-- </table> -->
+<!-- </div> -->

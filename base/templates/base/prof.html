@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilePond Plugin Image Preview Demo</title>
+    <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
+    <style>
+        /*
+ * FilePond Custom Styles
+ */
+
+.filepond--drop-label {
+	color: #4c4e53;
+}
+
+.filepond--label-action {
+	text-decoration-color: #babdc0;
+}
+
+.filepond--panel-root {
+	background-color: #edf0f4;
+}
+
+
+/**
+ * Page Styles
+ */
+html {
+	padding: 20vh 0 0;
+}
+
+.filepond--root {
+	width:170px;
+	margin: 0 auto;
+}
+
+    </style>
+</head>
+<body>
+
+    <!--
+The classic file input element we'll enhance to a file pond
+-->
+<input type="file" 
+class="filepond"
+name="filepond"
+accept="image/png, image/jpeg, image/gif"/>
+
+<!-- file upload itself is disabled in this pen -->
+
+    <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+    <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+
+    <script>
+    // Register the plugin with FilePond
+    FilePond.registerPlugin(// encodes the file as base64 data
+  FilePondPluginFileEncode,
+	
+	// validates files based on input type
+  FilePondPluginFileValidateType,
+	
+	// corrects mobile image orientation
+  FilePondPluginImageExifOrientation,
+	
+	// previews the image
+  FilePondPluginImagePreview,
+	
+	// crops the image to a certain aspect ratio
+  FilePondPluginImageCrop,
+	
+	// resizes the image to fit a certain size
+  FilePondPluginImageResize,
+	
+	// applies crop and resize information on the client
+  FilePondPluginImageTransform
+);
+
+
+    // Get a reference to the file input element
+    const inputElement = document.querySelector('input[type="file"]');
+
+    // Create the FilePond instance
+    
+    const pond = FilePond.create(inputElement);
+
+    
+    </script>
+
+</body>
+</html>
