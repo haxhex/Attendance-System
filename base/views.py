@@ -718,7 +718,11 @@ def editUser(request, pk):
 	form = EmployeeForm(instance=employee)
 	if request.method == 'POST':
 		form = EmployeeForm(request.POST, request.FILES,instance=employee)
+		mobile = request.POST.get("mobile_number")
 		if form.is_valid():
+			if is_valid_mobile(str(mobile)) == False and str(mobile) != "":
+				context = {'form':form, 'error':'This mobile number is not valid!'}
+				return render(request, 'base/edit_profile.html', context)
 			employee.department = department(employee.position)
 			form.save()
 			return redirect('employees_list')
