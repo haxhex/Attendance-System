@@ -308,12 +308,12 @@ def registerPage(request):
 				valid_username = False
 				return redirect('login')
 		
-		if er == False and valid_username and not form.is_valid():
-			# print("---Invalid Username")
-			# context= {'form': form, 'error':'Please enter a valid username.'}
-			# return render(request, 'base/sign-up.html', context)
-			er = True
-			errors.append('Please enter a valid username.')			
+		# if er == False and valid_username and not form.is_valid():
+		# 	# print("---Invalid Username")
+		# 	# context= {'form': form, 'error':'Please enter a valid username.'}
+		# 	# return render(request, 'base/sign-up.html', context)
+		# 	er = True
+		# 	errors.append('Please enter a valid username.')			
 
 	if er:
 		context= {'form': form, 'errors':errors}
@@ -614,12 +614,12 @@ def createUser(request):
 				valid_username = False
 				return redirect('employees_list')
 		
-		if er == False and valid_username and not form.is_valid():
+		# if er == False and valid_username and not form.is_valid():
 			# print("---Invalid Username")
 			# context= {'form': form, 'error':'Please enter a valid username.'}
 			# return render(request, 'base/sign-up.html', context)
-			er = True
-			errors.append('Please enter a valid username.')			
+			# er = True
+			# errors.append('Please enter a valid username.')			
 
 	if er:
 		context= {'form': form, 'errors':errors}
@@ -1039,15 +1039,15 @@ def export_io_excel(request, name, drange):
 	font_style = xlwt.XFStyle()
 	font_style.font.bold = True
 	columns = ['Date', 'Working Hours']
-	for i in range(1, max_io+1):
-		columns.append(f"Entry {i}")
-		columns.append(f"Exit {i}")
-	if max_io == 0:
-		columns.append(f"Entry 1")
-		columns.append(f"Exit 1")
+	# for i in range(1, max_io+1):
+	# 	columns.append(f"Entry {i}")
+	# 	columns.append(f"Exit {i}")
+	# if max_io == 0:
+	# 	columns.append(f"Entry 1")
+	# 	columns.append(f"Exit 1")
 	
-	for col_num in range(len(columns)):
-		ws.write(row_num, col_num, columns[col_num], font_style)
+	# for col_num in range(len(columns)):
+	# 	ws.write(row_num, col_num, columns[col_num], font_style)
 	
 	employees = Employee.objects.all()
 	employees_list = []
@@ -1070,6 +1070,14 @@ def export_io_excel(request, name, drange):
 					ws.write(rowx, 3 + 2*ii, str(io.end_time.time()), font_style)
 					ii += 1
 			i += 1
+   
+	for i in range(1, max_io):
+		columns.append(f"Entry {i}")
+		columns.append(f"Exit {i}")
+		print(columns)
+ 
+	for col_num in range(len(columns)):
+		ws.write(0, col_num, columns[col_num], font_style)
 	
 	wb.save(response)
 	return response
