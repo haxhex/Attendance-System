@@ -1349,6 +1349,26 @@ def switch_role(request, pk):
     print("-------****---------")
     return redirect('edit-user', pk)
 
+def add_inout(request):
+
+	form = CreateInOutForm()
+	if request.method == 'POST':
+		form = CreateInOutForm(request.POST)
+		print("Form Created")  
+		if form.is_valid():
+			print("----Form is Valid")
+			start_time = request.POST.get('start_time')
+			end_time = request.POST.get('end_time')
+			In_out.objects.create(
+				start_time = start_time,
+				end_time = end_time,
+				employee = request.user.employee
+			)
+			return redirect('dashboard')
+
+
+	context = {'form':form}
+	return render(request, 'base/create-inout.html', context)
 
 
 
