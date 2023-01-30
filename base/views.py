@@ -70,7 +70,7 @@ def face(request):
 			img = request.POST.get('pic')
 			print(img)
 			img_name1 = "1.png"
-			img_name1 = "static/images/" + img_name1
+			img_name1 = "static/images/faces/" + img_name1
 			urllib.request.urlretrieve(img, img_name1)
 			img = Image.open(img_name1).convert('RGB')
 			mtcnn = MTCNN()
@@ -79,7 +79,7 @@ def face(request):
 			isFace = fcd.detected
 			if isFace == True:
 				img_name2 = "2.png"
-				img_name2 = "static/images/" + img_name2
+				img_name2 = "static/images/faces/" + img_name2
 				detect.save(img_name2)
 				context = {'page':'reg', 'msg':'Your face detected and your picture registered successfully!'} 
 				return render (request , "base/face_registered.html", context)
@@ -93,6 +93,8 @@ def face(request):
 		except:			
 			context = {'page':'reg', 'msg':"There's problem in face recognition. Please try a gain!"} 
 			return render (request , "base/face.html", context)
+
+
 # User = get_user_model()
 
 # def home(request):
@@ -124,7 +126,76 @@ def io_archive(request):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
 def io_report(request):
-    return render(request ,'base/io_report.html')
+	employees_list = []
+	employees = Employee.objects.all()
+	for employee in employees:
+		if employee.user.id != request.user.id:
+			employees_list.append(employee) 
+            
+            
+	# sdate = dtt.datetime.strptime(drange.split(' - ')[0], '%Y-%m-%d').date()
+	# edate = dtt.datetime.strptime(drange.split(' - ')[1], '%Y-%m-%d').date()
+	# date_generated = [sdate + dtt.timedelta(days=x) for x in range(0, (edate-sdate).days+1)]
+	working_hours = []
+	in_outs = In_out.objects.all()
+	names = []
+	for emp in employees_list:
+		in_out_nums = 0
+		for in_out in in_outs:
+			if in_out.employee.id == emp.id:
+				in_out_nums += 1
+		if in_out_nums > 0:
+			in_out_list = []
+			for in_out in in_outs:
+				if in_out.employee.id == emp.id:
+					in_out_list.append(in_out)
+			if len(in_out_list) > 0:
+				timeList = []
+				timeList1 = []
+				for ins in in_out_list:
+					timeList.append(str(ins.start_time.time()))
+					timeList1.append(str(ins.end_time.time()))
+
+				mysum1 = dtt.timedelta()
+				for i in timeList:
+					(h, m, s) = i.split(':')
+					d = dtt.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+					mysum1 += d
+				print(str(mysum1))
+				mysum2 = dtt.timedelta()
+				for i in timeList1:
+					(h, m, s) = i.split(':')
+					d = dtt.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+					mysum2 += d
+					
+				print(str(mysum2))
+
+				time = mysum2 - mysum1
+				print("----------------")
+				print(time)
+				print("----------------")
+				working_hours.append(time)
+    
+			names.append(emp.id)
+		else:
+			working_hours.append("00:00:00")
+	# print(working_hours)
+	# print(names)
+	
+ 
+	
+
+	emps_list = zip(employees_list, working_hours)
+	dates = []
+	for in_out in in_outs:
+		if in_out.start_time.date() not in dates:
+			dates.append(str(in_out.start_time.date()))
+	min_date = min(dates)
+	max_date = max(dates)
+	drange = min_date + " - " + max_date
+    
+	context = {'employees' : emps_list, 'dep' : 'All', 'drange' : drange}
+	return render(request ,'base/io_report.html', context)
 
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
@@ -194,7 +265,7 @@ def password_reset_request(request):
 					email_template_name = "base/password_reset_email.txt"
 					c = {
 					"email":user.email,
-					'domain':'attsys.ir',
+					'domain':'127.0.0.1:8000',
 					'site_name': 'Website',
 					"uid": urlsafe_base64_encode(force_bytes(user.pk)),
 					"user": user,
@@ -203,7 +274,7 @@ def password_reset_request(request):
 					}
 					email = render_to_string(email_template_name, c)
 					try:
-						send_mail(subject, email, 'from@attsys.ir', [user.email], fail_silently=False)
+						send_mail(subject, email, 'admin@example.com' , [user.email], fail_silently=False)
 					except BadHeaderError:
 						return HttpResponse('Invalid header found.')
 					return redirect ("/password_reset/done/")
@@ -308,18 +379,21 @@ def registerPage(request):
 				valid_username = False
 				return redirect('login')
 		
-		# if er == False and valid_username and not form.is_valid():
-		# 	# print("---Invalid Username")
-		# 	# context= {'form': form, 'error':'Please enter a valid username.'}
-		# 	# return render(request, 'base/sign-up.html', context)
-		# 	er = True
-		# 	errors.append('Please enter a valid username.')			
-
+		if er == False and valid_username and not form.is_valid():
+			# print("---Invalid Username")
+			# context= {'form': form, 'error':'Please enter a valid username.'}
+			# return render(request, 'base/sign-up.html', context)
+			er = True
+			errors.append('Please enter a valid username.')			
+	positions = Position.objects.all()
+	position_list = []
+	for p in positions:
+		position_list.append(p)
 	if er:
-		context= {'form': form, 'errors':errors}
+		context= {'form': form, 'errors' : errors, 'positions' : position_list}
 		return render(request, 'base/sign-up.html', context)
    
-	context = {'form':form}
+	context = {'form':form, 'positions':positions}
 	return render(request, 'base/sign-up.html', context)
 
 @unauthenticated_user
@@ -381,12 +455,14 @@ def accountSettings(request):
 		form = EmployeeForm(request.POST, request.FILES,instance=employee)
 		if form.is_valid():
 			if is_valid_mobile(str(mobile)) == False and str(mobile) != "":
-				context= {'form': form, 'error':'Your mobile number is not valid'}
+				context= {'form': form, 'error':'Your mobile number is not valid' , 'position' : employee.position}
 				return render(request, 'base/edit_profile.html', context)
 			employee.department = department(employee.position)
 			form.save()
 			return redirect('view-profile')
-	context = {'form':form, 'page':page}
+	print("-----*****---")
+	print(employee.position)
+	context = {'form':form, 'page':page , 'position' : employee.position}
 	return render(request, 'base/edit_profile.html', context)
 
 
@@ -396,6 +472,8 @@ class CalendarView(generic.ListView):
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
         d = get_date(self.request.GET.get('month', None))
+        print("------")
+        print(d)
         user_id = self.request.user.employee
         cal = Calendar(d.year, d.month)
         in_outs = In_out.objects.all()
@@ -427,6 +505,7 @@ class CalendarView(generic.ListView):
         html_cal = cal.formatmonth(user_id, withyear=True)
         context['calendar'] = mark_safe(html_cal)
         context['prev_month'] = prev_month(d)
+        print("This Part ------------->")
         context['next_month'] = next_month(d)
         context['chart'] = chart
         context['datess'] = dates_ss
@@ -491,6 +570,7 @@ def prev_month(d):
     month = 'month=' + str(prev_month.year) + '-' + str(prev_month.month)
     return month
 def next_month(d):
+    print(d)
     days_in_month = calendar.monthrange(d.year, d.month)[1]
     last = d.replace(day=days_in_month)
     next_month = last + timedelta(days=1)
@@ -614,12 +694,12 @@ def createUser(request):
 				valid_username = False
 				return redirect('employees_list')
 		
-		# if er == False and valid_username and not form.is_valid():
+		if er == False and valid_username and not form.is_valid():
 			# print("---Invalid Username")
 			# context= {'form': form, 'error':'Please enter a valid username.'}
 			# return render(request, 'base/sign-up.html', context)
-			# er = True
-			# errors.append('Please enter a valid username.')			
+			er = True
+			errors.append('Please enter a valid username.')			
 
 	if er:
 		context= {'form': form, 'errors':errors}
@@ -627,7 +707,7 @@ def createUser(request):
 
 	context = {'form':form}
 	return render(request, 'base/create-user.html', context)
-    
+
     
     
 	# valid_username = True
@@ -718,15 +798,11 @@ def editUser(request, pk):
 	form = EmployeeForm(instance=employee)
 	if request.method == 'POST':
 		form = EmployeeForm(request.POST, request.FILES,instance=employee)
-		mobile = request.POST.get("mobile_number")
 		if form.is_valid():
-			if is_valid_mobile(str(mobile)) == False and str(mobile) != "":
-				context = {'form':form, 'error':'This mobile number is not valid!'}
-				return render(request, 'base/edit_profile.html', context)
 			employee.department = department(employee.position)
 			form.save()
 			return redirect('employees_list')
-	context = {'form':form, 'eid': pk, 'page':page}
+	context = {'form':form, 'eid': pk, 'page':page, 'position':employee.position, 'emper':employee}
 	return render(request, 'base/edit-user.html', context)
 
 
@@ -849,7 +925,7 @@ class ActRep(generic.ListView):
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
         daterange = self.request.GET.get('daterange') if self.request.GET.get('daterange') != None else ''
-        if self.request.user.is_superuser:
+        if self.request.user.groups.all()[0].name == "admin":  
             sel_user = self.request.GET.get('users') if self.request.GET.get('users') != None else ''
         else:
             sel_user = self.request.user.employee.id
@@ -1027,8 +1103,8 @@ def export_io_excel(request, name, drange):
 			date_time = dtt.datetime.strptime(str(mysum), "%H:%M:%S")
 			# t_vals.append(date_time)  
 			t_vals.append(date_time.strftime("%H:%M:%S"))
-		else:
 			max_io += 1
+		# else:
 	print(t_vals)
 	response = HttpResponse(content_type='application/ms-excel')
 	response['Content-Disposition'] = 'attachment; filename=IO_Report ' + \
@@ -1039,15 +1115,8 @@ def export_io_excel(request, name, drange):
 	font_style = xlwt.XFStyle()
 	font_style.font.bold = True
 	columns = ['Date', 'Working Hours']
-	# for i in range(1, max_io+1):
-	# 	columns.append(f"Entry {i}")
-	# 	columns.append(f"Exit {i}")
-	# if max_io == 0:
-	# 	columns.append(f"Entry 1")
-	# 	columns.append(f"Exit 1")
-	
-	# for col_num in range(len(columns)):
-	# 	ws.write(row_num, col_num, columns[col_num], font_style)
+ 
+	max_io = 0
 	
 	employees = Employee.objects.all()
 	employees_list = []
@@ -1068,6 +1137,7 @@ def export_io_excel(request, name, drange):
 				if str(io.start_time.date()) == str(dates_ss[i]):
 					ws.write(rowx, 2 + 2*ii, str(io.start_time.time()), font_style)
 					ws.write(rowx, 3 + 2*ii, str(io.end_time.time()), font_style)
+					max_io += 1
 					ii += 1
 			i += 1
    
@@ -1081,3 +1151,211 @@ def export_io_excel(request, name, drange):
 	
 	wb.save(response)
 	return response
+
+def dep_filter(request, dep, drange):
+	print(dep)
+	print(drange)
+	employees = Employee.objects.all()
+	employees_list = []
+	if dep != 'All':
+		for emp in employees:
+			if emp.department == dep:
+				employees_list.append(emp)
+	else:
+		for emp in employees:
+			employees_list.append(emp)
+   
+
+	s_date =  drange.split(' - ')[0]
+	e_date =  drange.split(' - ')[1]
+	in_outs = In_out.objects.filter(start_time__range=[dtt.datetime.strptime(s_date, "%Y-%m-%d"), dtt.datetime.strptime(e_date, "%Y-%m-%d")])
+	print("---------------")
+	for io in in_outs:
+		print(io.employee.first_name + "----" + str(io.start_time) + "----" + str(io.end_time))
+	print("----------------")
+
+	print(employees_list)
+    
+	working_hours = []
+	names = []
+	for emp in employees_list:
+		in_out_nums = 0
+		for in_out in in_outs:
+			if in_out.employee.id == emp.id:
+				in_out_nums += 1
+		if in_out_nums > 0:
+			in_out_list = []
+			for in_out in in_outs:
+				if in_out.employee.id == emp.id:
+					in_out_list.append(in_out)
+			if len(in_out_list) > 0:
+				timeList = []
+				timeList1 = []
+				for ins in in_out_list:
+					timeList.append(str(ins.start_time.time()))
+					timeList1.append(str(ins.end_time.time()))
+
+				mysum1 = dtt.timedelta()
+				for i in timeList:
+					(h, m, s) = i.split(':')
+					d = dtt.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+					mysum1 += d
+				print(str(mysum1))
+				mysum2 = dtt.timedelta()
+				for i in timeList1:
+					(h, m, s) = i.split(':')
+					d = dtt.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+					mysum2 += d
+					
+				print(str(mysum2))
+
+				time = mysum2 - mysum1
+				print("----------------")
+				print(time)
+				print("----------------")
+				working_hours.append(time)
+
+ 
+			names.append(emp.id)
+		else:
+			working_hours.append("00:00:00")
+   
+
+
+	emps_list = zip(employees_list, working_hours)
+ 
+	return render(request, 'base/io_report.html', {'employees': emps_list, 'dep':dep, 'drange' : drange})
+
+
+def export_total_hours(request, dep, drange):
+	sdate = dtt.datetime.strptime(drange.split(' - ')[0], '%Y-%m-%d').date()
+	edate = dtt.datetime.strptime(drange.split(' - ')[1], '%Y-%m-%d').date()
+	date_generated = [sdate + dtt.timedelta(days=x) for x in range(0, (edate-sdate).days+1)]
+	s_date =  drange.split(' - ')[0]
+	e_date =  drange.split(' - ')[1]
+	employees = Employee.objects.all()
+	employees_list = []
+	if dep != 'All':
+		for em in employees:
+			if em.department == dep:
+				employees_list.append(em)
+	else:
+		for em in employees:
+			employees_list.append(em)
+	in_outs = In_out.objects.filter(start_time__range=[dtt.datetime.strptime(s_date, "%Y-%m-%d"), dtt.datetime.strptime(e_date, "%Y-%m-%d")])
+	print("---------------")
+	for io in in_outs:
+		print(io.employee.first_name + "----" + str(io.start_time) + "----" + str(io.end_time))
+	print("----------------")
+	dates_ss = []
+	for in_out in in_outs:
+		if in_out.employee.department == dep:
+			if str(in_out.start_time.date()) not in dates_ss:
+				dates_ss.append(in_out.start_time.date())
+	print("******")
+	print(dates_ss)
+	working_hours = []
+	for emp in employees_list:
+		in_out_list = []
+		in_out_nums = 0
+		for in_out in in_outs:
+			if in_out.employee.id == emp.id:
+				in_out_nums += 1
+		if in_out_nums > 0:
+			for in_out in in_outs:
+				if in_out.employee.id == emp.id:
+					in_out_list.append(in_out)
+			if len(in_out_list) > 0:
+				timeList = []
+				timeList1 = []
+				for ins in in_out_list:
+					timeList.append(str(ins.start_time.time()))
+					timeList1.append(str(ins.end_time.time()))
+
+				mysum1 = dtt.timedelta()
+				for i in timeList:
+					(h, m, s) = i.split(':')
+					d = dtt.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+					mysum1 += d
+				print(str(mysum1))
+				mysum2 = dtt.timedelta()
+				for i in timeList1:
+					(h, m, s) = i.split(':')
+					d = dtt.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+					mysum2 += d
+					
+				print(str(mysum2))
+
+				time = mysum2 - mysum1
+				print("----------------")
+				print(time)
+				print("----------------")
+				working_hours.append(str(time))
+		else:
+			working_hours.append("00:00:00")
+
+	print(working_hours)
+	response = HttpResponse(content_type='application/ms-excel')
+	response['Content-Disposition'] = 'attachment; filename=Activities_Report ' + \
+		str(dtt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))+'.xls'
+	wb = xlwt.Workbook(encoding='utf-8')
+	ws = wb.add_sheet('Working Hours')
+	row_num = 0
+	font_style = xlwt.XFStyle()
+	font_style.font.bold = True
+	columns = ['Name', 'Working Hours']
+	for col_num in range(len(columns)):
+		ws.write(row_num, col_num, columns[col_num], font_style)
+	
+	 
+	for rowx in range(len(employees_list)):
+		ws.write(rowx+1, 0, employees_list[rowx].first_name + " " + employees_list[rowx].last_name, font_style)
+		ws.write(rowx+1, 1, working_hours[rowx], font_style)
+					
+	wb.save(response)
+	return response
+
+def add_position(request):
+
+	form = CreatePositionForm()
+	if request.method == 'POST':
+		form = CreatePositionForm(request.POST)
+		print("Form Created")
+		if form.is_valid():
+			print("----Form is Valid")
+			name = request.POST.get('name')
+			department = request.POST.get('department')
+			Position.objects.create(
+				name = name,
+				department = department
+			)
+			return redirect('employees_list')
+
+
+	context = {'form':form}
+	return render(request, 'base/create-position.html', context)
+
+def switch_role(request, pk):
+    print("-------****---------")
+    emp = Employee.objects.get(id=pk)
+    print(emp.user.id)
+    user = User.objects.get(id=emp.user.id)
+    print(user.groups.all()[0].name)
+    if user.groups.all()[0].name == "employee":
+       print("-------****---------")
+       group = Group.objects.get(name='admin')
+       user.groups.add(group)
+       group = Group.objects.get(name='employee')
+       user.groups.remove(group)
+    else:
+       print("-------FK---------")
+       group = Group.objects.get(name='employee')
+       user.groups.add(group)
+       group = Group.objects.get(name='admin')
+       user.groups.remove(group)
+    print("-------****---------")
+    return redirect('edit-user', pk)
+
+    
+    
+

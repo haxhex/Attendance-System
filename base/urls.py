@@ -30,9 +30,13 @@ urlpatterns = [
     path("act-dep-filter/<str:fltra>/<str:fltrd>/" , views.act_dep_filter , name="act-dep-filter"),  
     path('export-act-excel/<str:name>/<str:drange>/', views.export_act_excel, name="export-act-excel"),
     path('export-io-excel/<str:name>/<str:drange>/', views.export_io_excel, name="export-io-excel"),
+    path('export-total-hours/<str:dep>/<str:drange>/', views.export_total_hours, name="export-total-hours"),
+    path('add-position/', views.add_position, name="add-position"),
+    path('switch-role/<str:pk>/', views.switch_role, name="switch-role"),
     # path('register-face/', views.register_face, name="register-face"),
     re_path(r'^calendar/$', views.CalendarView.as_view(), name='calendar'),
     re_path(r'^event/new/$', views.event, name='event_new'),
 	re_path(r'^event/edit/(?P<event_id>\d+)/$', views.event, name='event_edit'),
+    path("dep-filter/<str:dep>/<str:drange>/", views.dep_filter, name="dep-filter"), 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
