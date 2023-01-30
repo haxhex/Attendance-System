@@ -234,10 +234,4 @@ class CreatePositionForm(ModelForm):
         fields = ['name', 'department']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control','id': 'form3Example0'}),            
-        }
-    
-
-
-
-
-        
+        } 

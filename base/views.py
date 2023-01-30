@@ -1356,6 +1356,9 @@ def switch_role(request, pk):
     print("-------****---------")
     return redirect('edit-user', pk)
 
+
+
+
     
     
 

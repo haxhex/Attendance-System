@@ -61,8 +61,7 @@
         >Dashboard</a
       >
     </li>
-    {% if request.user.is_superuser %}
-    <!-- super user -->
+    {% if user.groups.all.0.name == "admin" %}    <!-- super user -->
     <li style="float: left">
       <a
         class="white-a"
